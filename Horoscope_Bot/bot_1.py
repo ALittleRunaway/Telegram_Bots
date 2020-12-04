@@ -42,22 +42,40 @@ class Horoscope:
         return keyboard
 
     @staticmethod
-    def get_horoscope(sign_number):
+    def buttons_choose_day():
+        keyboard = types.InlineKeyboardMarkup()
+        key_yesterday = types.InlineKeyboardButton(text="Вчера", callback_data="day_yesterday")
+        keyboard = types.InlineKeyboardMarkup()
+        key_today = types.InlineKeyboardButton(text="Сегодня", callback_data="day_today")
+        keyboard = types.InlineKeyboardMarkup()
+        key_tomorrow = types.InlineKeyboardButton(text="Завтра", callback_data="day_tomorrow")
+        keyboard = types.InlineKeyboardMarkup()
+        key_tomorrow02 = types.InlineKeyboardButton(text="Послезавтра", callback_data="day_tomorrow02")
+        return keyboard
+
+    @staticmethod
+    def get_horoscope(sign_number, day=1):
         url = "https://ignio.com/r/export/utf/xml/daily/com.xml"
         r = requests.get(url)
         print(f"Status code: {r.status_code}")
         tree = ET.ElementTree(ET.fromstring(r.content))
         root = tree.getroot()
-        return root[sign_number][1].text
+        return root[sign_number][day].text
 
 
 @bot.message_handler(content_types=["text"])
-def get_text_messages(message):
-    if message.text.lower() == "привет":
-        bot.send_message(message.from_user.id, "Привет, сейчас я поведую, что уготовила тебе сегодня судьба! У-у-у!")
+def get_text_messages1(message):
+    if message.text.lower() == "/start" or message.text.lower() == "привет":
+        bot.send_message(message.from_user.id, "Привет, сейчас я поведую, что уготовила тебе судьба! У-у-у!")
+        time.sleep(2)
         keybord = Horoscope.buttons_choose_sign()
         bot.send_message(message.from_user.id, "Выбери знак, под покровительством "
                                                "которого ты был рождён.", reply_markup=keybord)
+        #bot.send_message(message.from_user.id, "Отлично! А теперь скажи мне, на какой день ты хочешь "
+        # "узнать предсказание?")
+        # keybord_2 = Horoscope.buttons_choose_day()
+        # bot.send_message(message.from_user.id, "Отлично! А теперь скажи мне, на какой день ты хочешь "
+        #                                        "узнать предсказание", reply_markup=keybord_2)
     elif message.text == "/help":
         bot.send_message(message.from_user.id, "Напиши: 'Привет'.")
     else:
@@ -67,34 +85,42 @@ def get_text_messages(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == "zodiac_aries":
-        msg = Horoscope.get_horoscope(1)
+        sign_number = 1
     if call.data == "zodiac_taurus":
-        msg = Horoscope.get_horoscope(2)
+        sign_number = 2
     if call.data == "zodiac_gemini":
-        msg = Horoscope.get_horoscope(3)
+        sign_number = 3
     if call.data == "zodiac_cancer":
-        msg = Horoscope.get_horoscope(4)
+        sign_number = 4
     if call.data == "zodiac_leo":
-        msg = Horoscope.get_horoscope(5)
+        sign_number = 5
     if call.data == "zodiac_virgo":
-        msg = Horoscope.get_horoscope(6)
+        sign_number = 6
     if call.data == "zodiac_libra":
-        msg = Horoscope.get_horoscope(7)
+        sign_number = 7
     if call.data == "zodiac_scorpio":
-        msg = Horoscope.get_horoscope(8)
+        sign_number = 8
     if call.data == "zodiac_sagittarius":
-        msg = Horoscope.get_horoscope(9)
+        sign_number = 9
     if call.data == "zodiac_capricorn":
-        msg = Horoscope.get_horoscope(10)
+        sign_number = 10
     if call.data == "zodiac_aquarius":
-        msg = Horoscope.get_horoscope(11)
+        sign_number = 11
     if call.data == "zodiac_pisces":
-        msg = Horoscope.get_horoscope(12)
+        sign_number = 12
 
+    # if call.data == "day_yesterday":
+    #     msg = Horoscope.get_horoscope(sign_number, 0)
+    # if call.data == "day_today":
+    #     msg = Horoscope.get_horoscope(sign_number, 1)
+    # if call.data == "day_tomorrow":
+    #     msg = Horoscope.get_horoscope(sign_number, 2)
+    # if call.data == "day_tomorrow02":
+    #     msg = Horoscope.get_horoscope(sign_number, 3)
+    msg = Horoscope.get_horoscope(sign_number)
     bot.send_message(call.message.chat.id, msg)
-    time.sleep(5)
-    bot.send_message(call.message.chat.id, "А вообще ты глупый, конечно, в такую ерунду-то верить. Завязывай.")
-
+    # time.sleep(5)
+    # bot.send_message(call.message.chat.id, "А вообще это глупо, конечно, в такую ерунду-то верить. Завязывай.")
 
 bot.polling(none_stop=True, interval=0)
 
